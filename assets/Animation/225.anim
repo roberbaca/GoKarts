@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "270",
+  "_name": "225",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.016666666666666666,
@@ -14,7 +14,7 @@
           {
             "frame": 0,
             "value": {
-              "__uuid__": "360aa2f0-5e9e-4292-a4c2-2fa1390c2d41"
+              "__uuid__": "a3f50620-fcc6-47c4-9c40-c7a69ee866e6"
             }
           }
         ]

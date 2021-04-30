@@ -17,33 +17,47 @@ export default class playerController extends cc.Component
  isDown: boolean = false;
  isUp: boolean = false;
  
+canMoveUp: boolean = true;
+
 
  // animaciones
- RightAnimation : cc.AnimationState;
- LeftAnimation : cc.AnimationState;
- idleAnimation : cc.AnimationState;
-
  Anim0 : cc.AnimationState;
+ Anim22 : cc.AnimationState;
+ Anim45 : cc.AnimationState;
+ Anim67 : cc.AnimationState;
  Anim90 : cc.AnimationState;
+ Anim112 : cc.AnimationState;
+ Anim135 : cc.AnimationState;
+ Anim157 : cc.AnimationState;
  Anim180 : cc.AnimationState;
+ Anim202 : cc.AnimationState;
+ Anim225 : cc.AnimationState;
+ Anim247 : cc.AnimationState;
  Anim270 : cc.AnimationState;
+ Anim292 : cc.AnimationState;
+ Anim315 : cc.AnimationState;
+ Anim337 : cc.AnimationState;
 
 
 
  // movimiento
  speed: number = 0;
- carX: number = 500;
- carY: number = 300;
- angulo: number = 0;
- acc: number = 0.2; 
- dec: number = 0.1;
- maxSpeed: number = 2;
+ carX: number = 0;
+ carY: number = 0;
+ angulo: number = 135;
+ acc: number = 0.4; 
+ dec: number = 0.05;
+ maxSpeed: number = 4;
+ turnSpeed: number = 0.08;
 
- // movimiento
- velocityX: number = 0;
- velocityY: number = 0;
- maxVel: number = 12;   
  
+ @property(cc.Label)
+ labelAngle: cc.Label = null;
+
+  
+ @property(cc.Label)
+ labelResto: cc.Label = null;
+
 
 /*
 // HUD
@@ -139,22 +153,36 @@ position: number = 20;
   
      this.gameController = cc.Canvas.instance.node.getComponent("gameController");   
      
-     this.LeftAnimation = this.getComponent( cc.Animation ).getAnimationState('Left');
-     this.RightAnimation = this.getComponent( cc.Animation ).getAnimationState('Right');
-     this.idleAnimation = this.getComponent( cc.Animation ).getAnimationState('Idle'); 
+     //this.LeftAnimation = this.getComponent( cc.Animation ).getAnimationState('Left');
+     //this.RightAnimation = this.getComponent( cc.Animation ).getAnimationState('Right');
+     //this.idleAnimation = this.getComponent( cc.Animation ).getAnimationState('Idle'); 
 
      this.Anim0 = this.getComponent( cc.Animation ).getAnimationState('0');
-     this.Anim180 = this.getComponent( cc.Animation ).getAnimationState('180');
-     this.Anim270 = this.getComponent( cc.Animation ).getAnimationState('270'); 
+     this.Anim22 = this.getComponent( cc.Animation ).getAnimationState('22');
+     this.Anim45 = this.getComponent( cc.Animation ).getAnimationState('45');
+     this.Anim67 = this.getComponent( cc.Animation ).getAnimationState('67');
      this.Anim90 = this.getComponent( cc.Animation ).getAnimationState('90'); 
+     this.Anim112 = this.getComponent( cc.Animation ).getAnimationState('112');
+     this.Anim135 = this.getComponent( cc.Animation ).getAnimationState('135');
+     this.Anim157 = this.getComponent( cc.Animation ).getAnimationState('157');
+     this.Anim180 = this.getComponent( cc.Animation ).getAnimationState('180');
+     this.Anim202 = this.getComponent( cc.Animation ).getAnimationState('202');
+     this.Anim225 = this.getComponent( cc.Animation ).getAnimationState('225');
+     this.Anim247 = this.getComponent( cc.Animation ).getAnimationState('247');
+     this.Anim270 = this.getComponent( cc.Animation ).getAnimationState('270'); 
+     this.Anim292 = this.getComponent( cc.Animation ).getAnimationState('292');
+     this.Anim315 = this.getComponent( cc.Animation ).getAnimationState('315');
+     this.Anim337 = this.getComponent( cc.Animation ).getAnimationState('337'); 
+    
+
       
  }
 
  start () 
  {
 
-
-
+    this.carX = this.node.position.x;
+    this.carY = this.node.position.y;
  }
 
  update(dt)
@@ -167,111 +195,17 @@ position: number = 20;
      */
     
       
-     // Limito la velocidad para que no se acelere de forma infinita
-
-     /*
-     if (this.velocityX <= (-this.maxVel))
-     {
-         this.velocityX = -this.maxVel;
-     }
-
-     if (this.velocityX >= this.maxVel)
-     {
-         this.velocityX = this.maxVel;
-     }        
-     
-     if (this.velocityY <= (-this.maxVel))
-     {
-         this.velocityY = -this.maxVel;
-     }
- 
-     if (this.velocityY >= this.maxVel)
-     {
-         this.velocityY = this.maxVel;
-     }
-*/
-
-
-     
-
-    // Animaciones del auto
-/*
-    if (this.isLeft)
-    {
-	    //this.sndSkid.play();
-	    //this.LeftAnimation.play();   
-        this.node.setPosition(this.node.position.x += this.velocityX,this.node.position.y);
-        this.velocityX -= this.acc; // MRUV
-        this.velocityY = 0;  
-    }
-
-    else if (this.isRight) 
-    {
-	    //this.sndSkid.play();
-   	    //this.RightAnimation.play();   
-        //this.node.setPosition(this.node.position.x += this.velocityX,this.node.position.y);
-        //this.velocityX += this.acc; // MRUV
-        //this.velocityY = 0; 
-        //this.getComponent(cc.Animation).play();
-
-    }
-
-    if (!this.isRight)
-    {
-    	//this.idleAnimation.play();
-        this.getComponent(cc.Animation).stop();
-    }
-
-
-    // Velocidad del auto
-
-    if (this.isUp && this.speed < 6.9)
-    {
-        this.speed += 0.1;   
-        
-    }
-
-
-    if (this.isDown && this.speed >= 0)
-    {
-        this.speed -= 0.1;   
-    }
-
-
-    if (this.speed <= 0)	 
-    {
-    	this.speed = 0;
-    }
-
-    if (this.isUp) 
-    {
-	    //this.sndMotor.play();   
-        this.node.setPosition(this.node.position.x,this.node.position.y += this.velocityY / 2 );
-        this.velocityY += this.acc; // MRUV
-        this.velocityX = 0;   
-    }
-
-    if (this.isDown) 
-    {
-	    //this.sndSkid.play();    
-        this.node.setPosition(this.node.position.x,this.node.position.y += this.velocityY / 2);
-        this.velocityY -= this.acc; // MRUV
-        this.velocityX = 0; 
-        
-    }
-	
-
-*/
+    
 
 
 
-    if (this.isUp && this.speed < this.maxSpeed)
+    if (this.isUp && this.speed < this.maxSpeed && this.canMoveUp)
     {
         if (this.speed < 0)
         {
             this.speed += this.dec;
         }
-        else
+        else if (this.speed >= 0)
         {
             this.speed += this.acc;
         }
@@ -308,44 +242,366 @@ position: number = 20;
 
     if (this.isRight && this.speed != 0)
     {
-        this.angulo += 0.09;
+        this.angulo += this.turnSpeed;
     }
 
     if (this.isLeft && this.speed != 0)
     {
-        this.angulo -= 0.09;
+        this.angulo -= this.turnSpeed;
     }
 
-    this.move();
-    this.rotate();
-
-    
-    // usar cos y sin
-    
-    if (this.rad2deg(this.angulo) > 0 && this.rad2deg(this.angulo) < 90)
-    {
-        this.Anim0.play();
-    }
-
-    if (this.rad2deg(this.angulo) >= 90 && this.rad2deg(this.angulo) < 180)
-    {
-        this.Anim90.play();
-    }
-
-    if (this.rad2deg(this.angulo) >= 180 && this.rad2deg(this.angulo) < 270)
-    {
-        this.Anim180.play();
-    }
-
-    if (this.rad2deg(this.angulo) >= 270 && this.rad2deg(this.angulo) < 360)
-    {
-        this.Anim270.play();
-    }
+    this.move();    
+    this.animaciones();
 
 
-
+    this.labelAngle.string = "Angle: " + String(this.rad2deg(this.angulo).toFixed());
+    this.labelResto.string = "Resto: " + String((this.angulo % (Math.PI * 2)).toFixed());
    
 }
+
+
+
+
+animaciones()
+{
+    if (Math.abs(this.rad2deg(this.angulo) % 360) >= 0 && Math.abs(this.rad2deg(this.angulo) % 360) < 22.5) 
+{
+    this.Anim0.play();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 22.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 45) 
+{
+    this.Anim0.stop();
+    this.Anim22.play();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 45 && Math.abs(this.rad2deg(this.angulo)% 360) < 67.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.play();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 67.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 90) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.play();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 90 && Math.abs(this.rad2deg(this.angulo)% 360) < 112.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.play();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 112.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 135) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.play();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 135 && Math.abs(this.rad2deg(this.angulo)% 360) < 157.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.play();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 157.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 180) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.play();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 180 && Math.abs(this.rad2deg(this.angulo)% 360) < 202.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.play();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 202.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 225) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.play();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 225 && Math.abs(this.rad2deg(this.angulo)% 360) < 247.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.play();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 247.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 270) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.play();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 270 && Math.abs(this.rad2deg(this.angulo)% 360) < 292.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.play();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 292.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 315) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.play();
+    this.Anim315.stop();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 315 && Math.abs(this.rad2deg(this.angulo)% 360) < 337.5) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.play();
+    this.Anim337.stop();
+}
+
+else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 337.5 && Math.abs(this.rad2deg(this.angulo)% 360) < 360) 
+{
+    this.Anim0.stop();
+    this.Anim22.stop();
+    this.Anim45.stop();
+    this.Anim67.stop();
+    this.Anim90.stop();
+    this.Anim112.stop();
+    this.Anim135.stop();
+    this.Anim157.stop();
+    this.Anim180.stop();
+    this.Anim202.stop();
+    this.Anim225.stop();
+    this.Anim247.stop();
+    this.Anim270.stop();
+    this.Anim292.stop();
+    this.Anim315.stop();
+    this.Anim337.play();
+}
+
+
+
+}
+
+
+
+
+
+
+
+
 
 
 // Colisiones
@@ -366,6 +622,12 @@ position: number = 20;
         
     }
 
+    if (otherCollider.name == "solid<BoxCollider>" && this.isUp)
+    {
+        this.canMoveUp = false;
+        this.speed = 0;
+    }
+
    
  
  }
@@ -375,6 +637,10 @@ position: number = 20;
         if (otherCollider.name == "enemyCar<BoxCollider>" || otherCollider.name == "palmTree<BoxCollider>")
         {
         }      
+        if (otherCollider.name == "solid<BoxCollider>")
+        {
+            this.canMoveUp = true;            
+        }
     }  
 
 
@@ -405,7 +671,7 @@ position: number = 20;
 
    rotate()
     {
-        this.node.setRotation(this.angulo * 180 / Math.PI);
+        //this.node.setRotation(this.angulo * 180 / Math.PI);
     }   
 
     rad2deg(angle)
