@@ -2,7 +2,6 @@
 
 import GameController, { GameStatus } from "./gameController";
 
-
 const {ccclass, property} = cc._decorator;
 
 @ccclass
@@ -17,7 +16,10 @@ export default class playerController extends cc.Component
  isDown: boolean = false;
  isUp: boolean = false;
  
-canMoveUp: boolean = true;
+ canMoveUp: boolean = true;
+ canMoveDown: boolean = true;
+ canMoveLeft: boolean = true;
+ canMoveRight: boolean = true;
 
 
  // animaciones
@@ -46,54 +48,79 @@ canMoveUp: boolean = true;
  carY: number = 0;
  angulo: number = 135;
  acc: number = 0.4; 
- dec: number = 0.05;
- maxSpeed: number = 4;
+ dec: number = 0.09;
+ maxSpeed: number = 5;
  turnSpeed: number = 0.08;
 
- 
+ // lap
+ lapNumber: number = 0;
+ lapTime: number = 0;
+ BestTime: number = 0;
+
+ //debug
  @property(cc.Label)
  labelAngle: cc.Label = null;
-
   
  @property(cc.Label)
  labelResto: cc.Label = null;
 
 
-/*
-// HUD
- @property(cc.RichText)
- RacePosition: cc.RichText = null;
+ // HUD
+ @property(cc.Label)
+ labelTime: cc.Label = null;
+
+ @property(cc.Label)
+ labelLap: cc.Label = null;
+
+ @property(cc.Label)
+ labelBestTime: cc.Label = null;
 
  @property(cc.RichText)
-Speed: cc.RichText = null;
+ labelRecord: cc.RichText = null;
 
 
-// Sound FX
- @property(cc.AudioSource)
- sndStartEngine: cc.AudioSource = null;
-
+ // sounds FX
  @property(cc.AudioSource)
  sndSkid: cc.AudioSource = null;
-
+ 
  @property(cc.AudioSource)
- sndCrash: cc.AudioSource = null;
+ sndNewRecord: cc.AudioSource = null;
 
- @property(cc.AudioSource)
- sndMotor: cc.AudioSource = null;
-*/
 
+ // aux
+ @property(cc.Sprite)
+ startLine: cc.Sprite = null;
+
+
+ // GameOver Screen
+ @property(cc.Node)
+ gameOverScreen: cc.Node = null;
+
+ @property(cc.Sprite)
+ cup: cc.Sprite = null;
+
+ @property(cc.Label)
+ yourTime: cc.Label = null;
+
+
+  // HUD
+ @property(cc.Node)
+ HUD: cc.Node = null;
+
+ // Buttons
+ @property(cc.Button)
+ btnRetry: cc.Button = null;
+
+ @property(cc.Button)
+ btnExit: cc.Button = null;
+ 
+ @property(cc.Button)
+ btnMenu: cc.Button = null;
 
 
 
  // asignamos el componente del GameController
  gameController: GameController = null;
-
- isGameOver: boolean = false;
-
-
-position: number = 20; 
-
-
 
 
  // eventos del teclado
@@ -102,26 +129,20 @@ position: number = 20;
     switch(event.keyCode)
     {
         case cc.macro.KEY.left:
-            this.isLeft = true;
-            
+            this.isLeft = true;            
             break;
 
         case cc.macro.KEY.right:
-            this.isRight = true;
-                     
+            this.isRight = true;                     
             break;
 
          case cc.macro.KEY.up:
-             this.isUp = true;
-                     
+             this.isUp = true;                     
              break;
 
          case cc.macro.KEY.down:
-             this.isDown = true;
-                 
-             break;
-
-        
+             this.isDown = true;                 
+             break;        
      }
  }
 
@@ -140,8 +161,7 @@ position: number = 20;
              break;
          case cc.macro.KEY.down:
              this.isDown = false;
-             break;
-         
+             break;         
      }     
  }
 
@@ -151,11 +171,7 @@ position: number = 20;
      cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN,this.movePlayer,this);
      cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP,this.stopPlayer,this);  
   
-     this.gameController = cc.Canvas.instance.node.getComponent("gameController");   
-     
-     //this.LeftAnimation = this.getComponent( cc.Animation ).getAnimationState('Left');
-     //this.RightAnimation = this.getComponent( cc.Animation ).getAnimationState('Right');
-     //this.idleAnimation = this.getComponent( cc.Animation ).getAnimationState('Idle'); 
+     this.gameController = cc.Canvas.instance.node.getComponent("gameController");        
 
      this.Anim0 = this.getComponent( cc.Animation ).getAnimationState('0');
      this.Anim22 = this.getComponent( cc.Animation ).getAnimationState('22');
@@ -173,31 +189,26 @@ position: number = 20;
      this.Anim292 = this.getComponent( cc.Animation ).getAnimationState('292');
      this.Anim315 = this.getComponent( cc.Animation ).getAnimationState('315');
      this.Anim337 = this.getComponent( cc.Animation ).getAnimationState('337'); 
-    
-
-      
+     
+     this.btnRetry.node.on(cc.Node.EventType.TOUCH_END,this.touchRetryBtn,this); 
+     this.btnExit.node.on(cc.Node.EventType.TOUCH_END,this.touchExitBtn,this); 
+     this.btnMenu.node.on(cc.Node.EventType.TOUCH_END,this.touchMenuBtn,this);       
  }
 
  start () 
  {
-
     this.carX = this.node.position.x;
     this.carY = this.node.position.y;
+    this.labelRecord.node.active = false;
+    this.gameOverScreen.active = false;
  }
 
  update(dt)
- {    
-     /*
+ {         
     if (this.gameController.gameStatus != GameStatus.Game_Playing)
     {
-       // return;
+       return;
     }    
-     */
-    
-      
-    
-
-
 
     if (this.isUp && this.speed < this.maxSpeed && this.canMoveUp)
     {
@@ -243,27 +254,122 @@ position: number = 20;
     if (this.isRight && this.speed != 0)
     {
         this.angulo += this.turnSpeed;
+        if (!this.sndSkid.isPlaying)
+        {
+            this.sndSkid.play();
+        }
+        
     }
 
     if (this.isLeft && this.speed != 0)
     {
         this.angulo -= this.turnSpeed;
+        if (!this.sndSkid.isPlaying)
+        {
+            this.sndSkid.play();
+        }
     }
 
     this.move();    
     this.animaciones();
-
+    
 
     this.labelAngle.string = "Angle: " + String(this.rad2deg(this.angulo).toFixed());
     this.labelResto.string = "Resto: " + String((this.angulo % (Math.PI * 2)).toFixed());
+
+    if(this.lapNumber > 0)
+    {
+        this.lapTime += dt;
+    }
+
+    if (this.lapNumber == 0)
+    {
+        this.labelLap.string = "Lap 1/5";
+    }
+    else
+    {
+        this.labelLap.string = "Lap " + String(this.lapNumber) + "/5";
+    }
+   
+    this.labelTime.string = "Time: " + String(this.lapTime.toFixed(3));
+    this.labelBestTime.string = "Best: " + String(this.BestTime.toFixed(3));
+
+
+    // Cuando se completan el total de vueltas, se muestra el resultado final
+    if (this.lapNumber == 6)
+    {
+        this.GameOver();
+    }
+   
    
 }
 
+
+GameOver()
+{
+    this.gameController.gameStatus = GameStatus.Game_Over;
+    this.HUD.active = false;
+    this.gameOverScreen.active = true;
+
+    if (this.BestTime > 11)
+    {
+        this.cup.getComponent(cc.Animation).play("noCup");        
+    }
+    else if (this.BestTime <= 11 && this.BestTime > 10.5)
+    {
+        this.cup.getComponent(cc.Animation).play("bronzeCup"); 
+    }
+    else if (this.BestTime <= 10.5 && this.BestTime > 9.9)
+    {
+        this.cup.getComponent(cc.Animation).play("silverCup"); 
+    }
+    else if (this.BestTime <= 9.9)
+    {
+        this.cup.getComponent(cc.Animation).play("goldCup"); 
+    }
+
+    this.yourTime.string = "Best time: " + String(this.BestTime.toFixed(3));
+
+
+}
+
+
+checkTime()
+{
+    if (this.lapNumber == 1)
+    {
+        this.BestTime = this.lapTime;
+        this.newRecord();
+    }
+
+    else if (this.lapNumber > 1)
+    {
+        if (this.lapTime < this.BestTime && this.lapTime != 0)
+        {
+            this.BestTime = this.lapTime;
+            this.newRecord();
+        }
+    }
+}
+
+newRecord()
+{
+    this.labelRecord.node.active = true;
+    this.sndNewRecord.play();
+    this.schedule(this.newRecordOff, 2, 0);
+}
+
+newRecordOff()
+{
+    this.labelRecord.node.active = false;
+}
 
 
 
 animaciones()
 {
+    // muestro la animacion correcta en funcion del angulo en el que se desplaza el auto
+
     if (Math.abs(this.rad2deg(this.angulo) % 360) >= 0 && Math.abs(this.rad2deg(this.angulo) % 360) < 22.5) 
 {
     this.Anim0.play();
@@ -591,16 +697,7 @@ else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 337.5 && Math.abs(this.rad2
     this.Anim337.play();
 }
 
-
-
 }
-
-
-
-
-
-
-
 
 
 
@@ -608,76 +705,81 @@ else if (Math.abs(this.rad2deg(this.angulo)% 360) >= 337.5 && Math.abs(this.rad2
  
  onCollisionEnter(otherCollider,selfCollider)
  {     
-  
-    if (otherCollider.name == "enemyCar<BoxCollider>")
-    {
-        //this.sndCrash.play();
-        cc.log("CRASH");
-    }
- 
-    if (otherCollider.name == "palmTree<BoxCollider>")
-    {
-     	//this.sndCrash.play();
-        cc.log("CRASH");
-        
-    }
 
-    if (otherCollider.name == "solid<BoxCollider>" && this.isUp)
+    if (otherCollider.name == "startLine<BoxCollider>")
     {
-        this.canMoveUp = false;
+        this.checkTime();
+        this.lapTime = 0;        
+        this.lapNumber++;        
+    } 
+  
+
+    if (otherCollider.name == "solid copy<BoxCollider>" && this.isUp)
+    {
+        this.canMoveUp = false;        
         this.speed = 0;
     }
 
-   
- 
+    if (otherCollider.name == "solid copy<BoxCollider>" && this.isLeft)
+    {
+        this.canMoveLeft = false;        
+        this.speed = 0;
+    }
+
+    if (otherCollider.name == "solid copy<BoxCollider>" && this.isRight)
+    {
+        this.canMoveRight = false;        
+        this.speed = 0;
+    }
+
+    if (otherCollider.name == "solid copy<BoxCollider>" && this.isDown)
+    {
+        this.canMoveDown = false;        
+        this.speed = 0;
+    } 
  }
 
     onCollisionExit(otherCollider,selfCollider)
-    {         
-        if (otherCollider.name == "enemyCar<BoxCollider>" || otherCollider.name == "palmTree<BoxCollider>")
+    {                     
+        if (otherCollider.name == "solid copy<BoxCollider>")
         {
-        }      
-        if (otherCollider.name == "solid<BoxCollider>")
-        {
-            this.canMoveUp = true;            
+            this.canMoveUp = true;  
+            this.canMoveDown = true;   
+            this.canMoveRight = true;   
+            this.canMoveLeft = true;             
         }
     }  
 
 
-    onCollisionStay(otherCollider,selfCollider)
-    {
-       
-        if (otherCollider.name == "enemyCar<BoxCollider>")
-        {         
-               
-        }
-    }
-
- 
-
-    endRace()
-    {
-        cc.director.loadScene('RacePositions');          
-    }
-
-
    move()
    {
-    this.carX += Math.sin(this.angulo) * this.speed;
-    this.carY += Math.cos(this.angulo) * this.speed;
-
-    this.node.setPosition(this.carX, this.carY);
-   }
-
-   rotate()
-    {
-        //this.node.setRotation(this.angulo * 180 / Math.PI);
-    }   
+       // movimiento del auto
+        this.carX += Math.sin(this.angulo) * this.speed;
+        this.carY += Math.cos(this.angulo) * this.speed;
+        this.node.setPosition(this.carX, this.carY);
+   }  
 
     rad2deg(angle)
     {
+        // para transformar de radianos a grados
         var deg = angle * 180 / Math.PI
-       return deg;
+        return deg;
     }
+
+    touchRetryBtn()
+    {
+        cc.director.loadScene("GameScene");
+    }
+
+    touchExitBtn()
+    {
+        cc.director.end();
+    }
+
+    touchMenuBtn()
+    {
+        cc.director.loadScene("TitleScreen");
+    }
+  
    
 }

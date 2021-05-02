@@ -12,36 +12,26 @@ export enum GameStatus
 
 
 @ccclass
-export default class GameController extends cc.Component 
+export default class gameController extends cc.Component 
 {
     mainCamera: cc.Camera = null; 
 
     //Game State
-    gameStatus: GameStatus = GameStatus.Game_Playing;  
+    gameStatus: GameStatus = GameStatus.Game_Ready;  
 
+    @property(cc.Sprite)
+    spr_counter: cc.Sprite = null;
 
-/*
-    @property(cc.Prefab)
-    raceTrackPrefab:cc.Prefab  = null
+    @property(cc.Sprite)
+    spr_p: cc.Sprite = null;    
 
+    @property(cc.AudioSource)
+    snd_CountDown: cc.AudioSource = null;
 
-    
-    /*
-    @property(cc.Prefab)
-    palmTreePrefab:cc.Prefab  = null
-
-
-    @property(cc.Prefab)
-    enemyCarPrefab:cc.Prefab  = null
-    */
-
-    world: number = -100;
-
+    tutorialOver: boolean = false;
 
     onLoad () 
-    {          
-        
-        //this.mainCamera = this.node.getChildByName("HUD_camera").getComponent(cc.Camera);
+    {            
 
        // activamos el sistema de Colisiones
         var collisionManager = cc.director.getCollisionManager();
@@ -52,29 +42,30 @@ export default class GameController extends cc.Component
     }
 
     start () 
-    {
-        for (let i = 0; i < 190; i++)
-	    {
-		    //var newRaceTrack = cc.instantiate(this.raceTrackPrefab);       
-    	    //newRaceTrack.setPosition(0, 0 - i);           
-		    //newRaceTrack.width =  1500 / (this.world / (newRaceTrack.position.y));
-            //newRaceTrack.opacity = -500/ (this.world / (newRaceTrack.position.y));
-    	    //this.node.getChildByName("raceTrack").addChild(newRaceTrack);  	
-	    }
+    {        
+        this.spr_counter.getComponent(cc.Animation).play();
+        this.snd_CountDown.play();  
+        this.schedule(this.countDown, 3, 0);
+        this.schedule(this.pIcon, 6, 0);         
     }
 
     update (dt) 
     {
-       
+         
         
-    }
+    }  
 
-    createRaceTrack()
+    countDown()
     {
-    	
+        this.spr_counter.node.active = false;
+        this.gameStatus= GameStatus.Game_Playing;  
     }
 
-   
-  
+    pIcon()
+    {
+        this.spr_p.node.active = false;
+    }
+    
+    
     
 }
